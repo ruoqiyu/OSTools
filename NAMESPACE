@@ -1,0 +1,8 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("stats", "as.formula", "cov", "var", "sd", "model.matrix", "t.test", "pnorm", "qnorm", "quantile", "uniroot")
+importFrom("plyr", "laply", "count", "daply")
+importFrom("mvnfast", "maha")
+importFrom("methods", "is")
+importFrom("ggplot2", "ggplot", "aes", "geom_point", "scale_shape_manual", "geom_vline", "xlab")
+importFrom("rlang", ".data")
+importFrom("nbpMatching", "distancematrix", "nonbimatch")

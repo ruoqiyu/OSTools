@@ -1,0 +1,10 @@
+love.plot<-function(before,after,covariates,name='abs.stand.diff',
+                    sizev=2,shapev=c(4,1),linex=c(0.1,0.2)){
+  plot.dataframe=data.frame(measure=c(before,after),covariate=rep(covariates,2),
+                            type=factor(c(rep(c("Before","After"),each=length(covariates)))))
+  ggplot2::ggplot(plot.dataframe,ggplot2::aes(x=.data$measure,y=.data$covariate))+
+    ggplot2::geom_point(size=sizev,ggplot2::aes(shape=.data$type))+
+    ggplot2::scale_shape_manual(values=shapev)+
+    ggplot2::geom_vline(xintercept=linex,lty=2)+
+    ggplot2::xlab(name)
+}
