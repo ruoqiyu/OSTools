@@ -8,8 +8,8 @@ alpha=0.05,range=c(-100,100),grid=seq(0,10000,1),tol=0.0001)
 \arguments{
 \item{treated.r}{ A vector of responses in the treated group.}
 \item{control.r}{ A vector of responses in the control group.}
-\item{k}{ Quantile of interest.}
-\item{Delta0}{ Effect value in the hypothesis testing.}
+\item{k}{ Quantile of interest for the potential outcome under control.}
+\item{Delta0}{ Dilated treatment effect value in the null hypothesis.}
 \item{alternative}{ Direction of the alternative hypothesis. It can be one of 'greater' and 'less'.}
 \item{alpha}{ Coverage probability of confidence interval is 1-alpha.}
 \item{range}{ Range to search for the root in the uniroot function, which is used to determine the two end points of the confidence interval.}
