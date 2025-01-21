@@ -1,7 +1,7 @@
 Package: OSTools
 Type: Package
 Title: Causal Inference Tools for Observational Studies
-Version: 0.1.0
+Version: 0.1.1
 Author: Ruoqi Yu, Dylan Small
 Maintainer: Ruoqi Yu <ruoqi.yu.ry@gmail.com>
 Description: This package provides practical causal inference tools for observational studies, including building matched samples with similar distributions for observed covariates, evaluating covariate balance, and conducting randomization inference and sensitivity analysis for the outcome analysis to assess the conclusion's sensitivity to unobserved covariates.
@@ -11,7 +11,7 @@ Description: This package provides practical causal inference tools for observat
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: stats, plyr, mvnfast, methods, MASS, rlemon, ggplot2, rlang, nbpMatching
+Imports: stats, plyr, mvnfast, methods, MASS, rlemon, ggplot2, rlang, nbpMatching, sensitivityfull, optmatch, sensitivity2x2xk
 Suggests: rrelaxiv
 Additional_repositories:	https://github.com/josherrickson/rrelaxiv
 Note: One minimum cost flow problem may have several or many solutions that are equivalent in providing the same minimum total or mean cost. Minor differences between computers or implementations may have the minor consequence of altering which equivalent solution is produced.

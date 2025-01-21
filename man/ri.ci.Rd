@@ -26,7 +26,7 @@ Confidence interval for the treatment effect, which is constructed by inverting 
 treated.r.fishoil=c(8,12,10,14,2,0,0);
 control.r.fishoil=c(-6,0,1,2,-3,-4,2);
 
-ri.ci(treated.r=treated.r.fishoil,control.r=control.r.fishoil,alpha=0.05,alternative='two.sided',
-      statistic='mean.diff',exact=T)
+ri.ci(treated.r=treated.r.fishoil,control.r=control.r.fishoil,alpha=0.05,
+      alternative='two.sided',statistic='mean.diff',exact=TRUE)
 }
 

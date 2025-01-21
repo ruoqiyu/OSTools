@@ -1,4 +1,4 @@
-sens.ci<-function(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
+sens.ci<-function(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
                   weight.par=c(1,1,1),alpha=0.05,alternative='two-sided',
                   tol=NULL,interval=NULL){
   m=weight.par[1]
@@ -9,13 +9,53 @@ sens.ci<-function(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
   
   stopifnot((alpha>0)&(alpha<1))
   if (alternative=='two-sided') alpha<-alpha/2
+  
+  if (method=='signedrank'){
+    tr<-y[,1]
+    ct<-as.vector(unlist(y[,-1]))
+    mx<-max(tr)-min(ct)
+    mn<-min(tr)-max(ct)
+    if (is.null(interval)) interval<-c(mn,mx)
+    else stopifnot(length(interval)==2)
+    stopifnot(interval[2]>interval[1])
+#    interval2<-c(-interval[2],-interval[1])
+    if (is.null(tol)) tol<-((max(interval)-min(interval)))/500000
+    else stopifnot(tol>0)
+    
+    taugrid=seq(interval[1],interval[2],tol);
+    Dplus.taugrid=rep(0,length(taugrid));
+    Dminus.taugrid=rep(0,length(taugrid));
+    for(i in 1:length(taugrid)){
+      tau=taugrid[i];
+      deviates=sens.analysis(y,NULL,NULL,Gamma,tau,alternative,'signedrank',
+                             inner,trim,lambda,weight.par)$deviate
+      Dplus.taugrid[i]=deviates$Dplus;
+      Dminus.taugrid[i]=deviates$Dminus;
+    }
+    
+    lower.si=min(taugrid[Dplus.taugrid<=1.96]);
+    upper.si=max(taugrid[Dminus.taugrid>=-1.96]);
+    return(list(Confidence.Interval=c(lower.si,upper.si)))
+  }
+  
+  if (method=='alignedrank'){
+    cibound.func<-function(tau,Gamma,alternative="greater"){
+      sens.analysis(y,Gamma=Gamma,tau=tau,alternative=alternative,method='alignedrank')$pval-alpha
+    }
+    
+    # Confidence bounds
+    lci.bound=uniroot(cibound.func,c(-10,30),Gamma=Gamma,alternative="greater")
+    uci.bound=uniroot(cibound.func,c(-10,30),Gamma=Gamma,alternative="less")
+    return(list(Confidence.Interval=c(lci.bound$root,uci.bound$root)))
+  }
+  
   if (method=='m'){
     funcCI<-function(tau,ymat){
       target<-alpha
       ntau<-length(tau)
       o<- rep(NA,ntau)
       for (i in 1:ntau){
-        pp<-sens.analysis(ymat,gamma=gamma,tau=tau[i],alternative='greater',method=method,inner=inner,
+        pp<-sens.analysis(ymat,Gamma=Gamma,tau=tau[i],alternative='greater',method=method,inner=inner,
                           trim=trim,lambda=lambda,weight.par=weight.par)$pval
         o[i]<-(pp-target)
       }
@@ -27,7 +67,7 @@ sens.ci<-function(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
       ntau<-length(tau)
       o<-rep(NA, ntau)
       for (i in 1:ntau){
-        dev<-sens.analysis(ymat,gamma=gamma,tau=tau[i],alternative='greater',method=method,inner=inner,
+        dev<-sens.analysis(ymat,Gamma=Gamma,tau=tau[i],alternative='greater',method=method,inner=inner,
                           trim=trim,lambda=lambda,weight.par=weight.par)$deviate
         o[i]<-(dev-target)
       }
@@ -64,7 +104,5 @@ sens.ci<-function(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
     }
     names(CI)<-c("minimum","maximum")
     list(PointEstimate=PointEstimate,Confidence.Interval=CI)
-  }else{
-    warning('method needs to be \'m\'.')
   }
 }

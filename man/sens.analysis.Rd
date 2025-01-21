@@ -4,15 +4,21 @@
 Sensitivity analysis in observational studies.
 }
 \usage{
-sens.analysis(y,gamma=1,tau=0,alternative='two-sided',method='m',
-inner=0,trim=3,lambda=1/2,weight.par=c(1,1,1))
+sens.analysis(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-sided',
+method='m',inner=0,trim=3,lambda=1/2,weight.par=c(1,1,1))
 }
 \arguments{
 \item{y}{
 An n by J matrix where (i) the rows are n matched sets, (ii) the first column is the treated response in a set, columns 2 to J contain the responses of controls in the same matched set. Every set must have J-1 controls, and NAs are not allowed in y.
 }
-\item{gamma}{
-The sensitivity parameter: gamma=1 for a randomization test, gamma>1 for sensitivity bounds. This parameter gamma is denoted by the upper case Greek letter gamma in the literature, e.g., Rosenbaum (2007, 2014).
+\item{D}{
+An input argument required when method='mcnemar': the number of discordant pairs.
+}
+\item{Tobs}{
+Observed value of test statistic for the McNemar test: number of discordant pairs in which treated unit has a 1.
+}
+\item{Gamma}{
+The sensitivity parameter: Gamma=1 for a randomization test, Gamma>1 for sensitivity bounds. This parameter Gamma is denoted by the upper case Greek letter Gamma in the literature, e.g., Rosenbaum (2007, 2014).
 }
 \item{tau}{
 If tau=0, test the null hypothesis of no treatment effect.  If tau is not 0, test the null hypothesis that the treatment effect is an additive shift of tau against the alternative that the effect is larger than tau in the direction specified by alternative.
@@ -37,6 +43,7 @@ If method='m', using weighted Huber-Maritz M-statistics determined by the parame
 
 (vii) The permutational t-test is unweighted and permutes the observations themselves without ranking or scoring. It sets inner=0, trim=Inf, lambda=1/2, weight.par=c(1,1,1).   This method is the permutation test that uses the treated-minus-control difference in means as a test statistic.
 
+if method='mcnemar', using the McNemar test for paired binary outcomes.
 }
 \item{inner}{
 Inner trimming to increase design sensitivity. Use of inner<0 or inner>trim will generate an error.
@@ -56,8 +63,8 @@ A vector of three parameters (m,m1,m2) that determine the weights, as in express
 \item{pval}{Approximate upper bound on the P-value. }
 \item{deviate}{Deviate that is compared to the upper tail of the standard Normal distribution to obtain the P-value.}
 \item{statistic}{Value of the test statistic.}
-\item{expectation}{Maximum null expectation of the test statistic for the given value of gamma.}
-\item{variance}{Among null distributions that yield the maximum expectation, variance is the maximum possible variance for the given value of gamma.}
+\item{expectation}{Maximum null expectation of the test statistic for the given value of Gamma.}
+\item{variance}{Among null distributions that yield the maximum expectation, variance is the maximum possible variance for the given value of Gamma.}
 }
 
 \description{
@@ -77,8 +84,8 @@ dist<-maha.dense(d$z,X)
 dist<-add.caliper(dist, d$z, d$p, c(-.5,.15), stdev=TRUE, penalty=1000)
 o<-match.os(d$z, dist, d, fine=d$education, ncontrol=1)
 md<-o$data
-sens.analysis(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),gamma=1)
-sens.analysis(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),gamma=1.5)
+sens.analysis(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),Gamma=1)
+sens.analysis(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),Gamma=1.5)
 }
 }
 

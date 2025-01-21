@@ -4,7 +4,7 @@
 Point estimate and confidence interval for sensitivity analysis in observational studies.
 }
 \usage{
-sens.ci(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
+sens.ci(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
     weight.par=c(1,1,1),alpha=0.05,alternative='two-sided',
     tol=NULL, interval=NULL)
 }
@@ -13,8 +13,8 @@ sens.ci(y,gamma=1,method='m',inner=0,trim=3,lambda=1/2,
 \item{y}{
 An n by J matrix, where (i) the rows are n matched sets, (ii) the first column is the treated response in a set, columns 2 to J contain the responses of controls in the same matched set.  Every set must have J-1 controls, and NAs are not allowed in y.
 }
-\item{gamma}{
-The sensitivity parameter: gamma=1 for a randomization test, gamma>1 for sensitivity bounds. This parameter gamma is denoted by the upper case Greek letter gamma in the literature, e.g., Rosenbaum (2007, 2014).
+\item{Gamma}{
+The sensitivity parameter: Gamma=1 for a randomization test, Gamma>1 for sensitivity bounds. This parameter gamma is denoted by the upper case Greek letter gamma in the literature, e.g., Rosenbaum (2007, 2014).
 }
 \item{method}{The method argument is the same as for the sens.analysis function.  See the help file for sens.analysis for more information.
 }
@@ -51,7 +51,7 @@ dist<-maha.dense(d$z,X)
 dist<-add.caliper(dist, d$z, d$p, c(-.5,.15), stdev=TRUE, penalty=1000)
 o<-match.os(d$z, dist, d, fine=d$education, ncontrol=1)
 md<-o$data
-sens.ci(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),gamma=1.2)
+sens.ci(cbind(md$homocysteine[md$z==1],md$homocysteine[md$z==0]),Gamma=1.2)
 }
 
 

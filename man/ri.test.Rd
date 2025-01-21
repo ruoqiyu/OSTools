@@ -25,12 +25,12 @@ control.r.fishoil=c(-6,0,1,2,-3,-4,2);
 
 # Test no treatment effect for fish oil data
 res=ri.test(treated.r.fishoil,control.r.fishoil,
-            alternative='greater',statistic='mean.diff',exact=T)
+            alternative='greater',statistic='mean.diff',exact=TRUE)
 res$pval
 
 set.seed(10)
 res=ri.test(treated.r.fishoil,control.r.fishoil,alternative='greater',
-            statistic='mean.diff',exact=F,n.mc=1000)
+            statistic='mean.diff',exact=FALSE,n.mc=1000)
 res$pval
 res$lowerci
 res$upperci

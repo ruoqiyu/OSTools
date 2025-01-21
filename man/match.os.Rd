@@ -41,7 +41,7 @@ The match minimizes the total distance between treated subjects and their matche
 For discussion of networks for fine-balance, see Rosenbaum (1989, Section 3) and Rosenbaum (2010).
 For near-fine balannce balance, see Yang et al. (2012).
 
-You MUST install and load the optmatch package to use match().
+You MUST install and load the optmatch package to use match.os().
 }
 \examples{
 \donttest{

@@ -1,21 +1,26 @@
-\name{balance.check}
-\alias{balance.check}
-\title{Check covariate balance of the matched data set.}
+\name{balance.check.full}
+\alias{balance.check.full}
+\title{Check standardized mean differences (SMDs) of full matching.}
 \usage{
-balance.check(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.dist=1000)
+balance.check.full(fdata,mdata,fz,mz,mset,fmissing=0,mmissing=0,parameter="ate")
 }
 \arguments{
 \item{fdata}{ A full data frame with length(fz) rows and columns being variables that need to check SMDs. fdata and mdata must have the same variables with same column names in the same order.}
 \item{mdata}{ A matched data frame with length(mz) rows and columns being variables that need to check SMDs. fdata and mdata must have the same variables with same column names in the same order.}
 \item{fz}{ A vector whose ith coordinate is 1 for a treated unit and is 0 for a control for subjects in the full data set.}
 \item{mz}{ A vector whose ith coordinate is 1 for a treated unit and is 0 for a control for subjects in the matched data set.}
-\item{measure}{ A character for the name of covariate balance measure. It can be one of 'smd', 't.test', and 'crossmatch'.}
-\item{s.dist}{ A multiplier to scale the distances for crossmatch test.}
+\item{mset}{ A vector of matched set information.}
+\item{fmissing}{ A matrix of missingness indicators for the full data.}
+\item{mmissing}{ A matrix of missingness indicators for the matched data.}
+\item{parameter}{ It can be "ate" or "att", which corresponds to different weights when evaluating the balance after matching.}
 }
-\value{ If measure='smd', the output is a matrix with one row for each variable and five columns being the mean of treated group, mean of matched control group, mean of full control group, SMD of matched control group and SMD of full control group. If measure='t.test', the output is a matrix with one row for each variable and two columns being the two sample t-test p-values before and after matching. If measure='crossmatch', the output is a list of six elements, including the test statistic, its expectation and variance, the standardized deviation, exact p-value and approximate p-value.
+\value{ The output is a list of three parts.
+\item{var}{ Names of covariates for which the balance is evaluated.}
+\item{smd.before}{ The standardized mean differences before matching.}
+\item{smd.after}{ The standardized mean differences after matching.}
 }
 \description{
-The function is used to create a table of mean and SMDs to check the balance before and after matching.
+The function is used to create a table of mean and SMDs to check the balance before and after full matching.
 }
 \examples{
 # To run this example, you must load the optmatch package.
@@ -27,11 +32,11 @@ X<-cbind(female,age,black,education,povertyr,bmi)
 p<-glm(z~female+age+black+education+povertyr+bmi,family=binomial)$fitted.values
 d<-cbind(nh0506Homocysteine,p)
 detach(nh0506Homocysteine)
-dist<-maha.dense(d$z,X)
-o<-match.os(d$z, dist, d)
+dist<-maha.dense(d$z,X,matrix=TRUE)
+o<-match.os.full(d$z, dist, d)
 matcheddata<-o$data
 Xm<-subset(matcheddata, select=c('female','age','black','education','povertyr','bmi','p'))
-balance.check(cbind(X,p),Xm,d$z,matcheddata$z)
+balance.check.full(cbind(X,p),Xm,d$z,matcheddata$z,matcheddata$mset)
 }
 }
 \references{
