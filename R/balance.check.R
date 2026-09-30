@@ -1,4 +1,12 @@
 balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.dist=1000){
+  if (!is.null(fdata)) {
+    if (is.null(dim(fdata))) fdata <- matrix(fdata, ncol=1)
+    stopifnot(length(fz) == nrow(fdata), all(fz %in% c(0,1)), all(c(0,1) %in% fz))
+  }
+  if (!is.null(mdata)) {
+    if (is.null(dim(mdata))) mdata <- matrix(mdata, ncol=1)
+    stopifnot(length(mz) == nrow(mdata), all(mz %in% c(0,1)), all(c(0,1) %in% mz))
+  }
   if (is.null(fdata) & is.null(mdata))
     stop('At least one of fdata and mdata needs to be entered.')
 
@@ -10,10 +18,10 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
 
     if (is.vector(fdata)) fdata<-matrix(fdata,ncol=1)
     if (is.vector(mdata)) mdata<-matrix(mdata,ncol=1)
-    fd0<-fdata[which(fz==0),]
-    fd1<-fdata[which(fz==1),]
-    md0<-mdata[which(mz==0),]
-    md1<-mdata[which(mz==1),]
+    fd0<-fdata[which(fz==0),,drop=FALSE]
+    fd1<-fdata[which(fz==1),,drop=FALSE]
+    md0<-mdata[which(mz==0),,drop=FALSE]
+    md1<-mdata[which(mz==1),,drop=FALSE]
     if (is.vector(fd0)) fd0<-matrix(fd0,length(fd0),1)
     if (is.vector(md0)) md0<-matrix(md0,length(md0),1)
     if (is.vector(fd1)) fd1<-matrix(fd1,length(fd1),1)
@@ -70,7 +78,7 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
       a1<-sum(tab[1,]==1)
 
       crossmatchdist<-function(N,n){
-        if (bigN%%2 == 1){
+        if (N%%2 == 1){
           stop("The number of subjects, bigN, should be even")
           return(NA)
         }
@@ -113,8 +121,8 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
     stopifnot(all(fz%in%c(0,1)))
 
     if (is.vector(fdata)) fdata<-matrix(fdata,ncol=1)
-    fd0<-fdata[which(fz==0),]
-    fd1<-fdata[which(fz==1),]
+    fd0<-fdata[which(fz==0),,drop=FALSE]
+    fd1<-fdata[which(fz==1),,drop=FALSE]
     if (is.vector(fd0)) fd0<-matrix(fd0,length(fd0),1)
     if (is.vector(fd1)) fd1<-matrix(fd1,length(fd1),1)
 
@@ -152,15 +160,15 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
     stopifnot(all(mz%in%c(0,1)))
 
     if (is.vector(mdata)) mdata<-matrix(mdata,ncol=1)
-    md0<-mdata[which(mz==0),]
-    md1<-mdata[which(mz==1),]
+    md0<-mdata[which(mz==0),,drop=FALSE]
+    md1<-mdata[which(mz==1),,drop=FALSE]
     if (is.vector(md0)) md0<-matrix(md0,length(md0),1)
     if (is.vector(md1)) md1<-matrix(md1,length(md1),1)
 
     if (measure=='smd'){
       stop('fdata and fz are needed to calculate the SMDs.')
     }else if (measure=='t.test'){
-      nvar=ncol(fdata)
+      nvar=ncol(mdata)
       meanm0<-apply(md0,2,mean,na.rm=TRUE)
       meanm1<-apply(md1,2,mean,na.rm=TRUE)
       t.test.pval.after=rep(0,nvar)
@@ -168,7 +176,7 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
         t.test.pval.after[i]=stats::t.test(md1[,i],md0[,i])$p.value
       }
       r=cbind(meanm1,meanm0,t.test.pval.after)
-      rownames(r)<-colnames(fdata)
+      rownames(r)<-colnames(mdata)
       colnames(r)<-c('Treated Mean','Control Mean','P-value')
       r
     }else if (measure=='crossmatch'){
@@ -188,7 +196,7 @@ balance.check<-function(fdata=NULL,mdata=NULL,fz=NULL,mz=NULL,measure='smd',s.di
       a1<-sum(tab[1,]==1)
 
       crossmatchdist<-function(N,n){
-        if (bigN%%2 == 1){
+        if (N%%2 == 1){
           stop("The number of subjects, bigN, should be even")
           return(NA)
         }

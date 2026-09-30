@@ -1,10 +1,10 @@
-\name{sens.ci.full}
-\alias{sens.ci.full}
+\name{sens.analysis.full}
+\alias{sens.analysis.full}
 \title{
 Sensitivity analysis in full matching.
 }
 \usage{
-sens.anallysis.full(y,z,mset,Gamma=1,method='m',alternative='two-sided',
+sens.analysis.full(y,z,mset,Gamma=1,method='m',alternative='two-sided',
 tau=0,inner=0,trim=3,lambda=1/2)
 }
 
@@ -20,6 +20,7 @@ The sensitivity parameter: Gamma=1 for a randomization test, Gamma>1 for sensiti
 If alternative='greater', the one-sided alternative hypothesis is that treatment increases the level of response by at least tau. If alternative='less', the one-sided alternative that the treatment decreases the level of response by at least tau. If alternative='two-sided', the alternative hypothesis is two-sided.
 }
 \item{tau}{
+For method='mh', tau must be zero.
 If tau=0, test the null hypothesis of no treatment effect.  If tau is not 0, test the null hypothesis that the treatment effect is an additive shift of tau against the alternative that the effect is larger than tau in the direction specified by alternative.
 }
 \item{inner}{Inner trimming to increase design sensitivity.  See the help file for sens.analysis for more information.}
@@ -28,7 +29,7 @@ If tau=0, test the null hypothesis of no treatment effect.  If tau is not 0, tes
 }
 
 \value{
-\item{pval}{The upper bound on the 1-sided P-value.}
+\item{pval}{The upper bound on the requested P-value. Two-sided results double the smaller one-sided upper bound, capped at 1.}
 \item{data.array}{A 3-dimensional contingency table in array form where each dimension is at least 2 for Mantel-Haenszel test.}
 \item{deviate}{The deviate that was compared to the Normal distribution to produce pval.}
 \item{statistic}{The value of the M-statistic.}
@@ -37,7 +38,7 @@ If tau=0, test the null hypothesis of no treatment effect.  If tau is not 0, tes
 }
 
 \description{
-Obtains point estimates and confidence intervals for m test in full matching.
+Performs sensitivity tests for M-statistics or binary outcomes in full matching.
 }
 
 \examples{

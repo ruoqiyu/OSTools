@@ -60,7 +60,7 @@ A vector of three parameters (m,m1,m2) that determine the weights, as in express
 
 }
 \value{
-\item{pval}{Approximate upper bound on the P-value. }
+\item{pval}{For M-statistics and aligned ranks, an approximate upper bound on the P-value. For signed ranks and McNemar tests, a list containing lowerbound and upperbound. Two-sided M-statistic and aligned-rank results double the smaller directional upper bound, capped at 1. McNemar results combine equal-tail directional bounds with the same Bonferroni correction.}
 \item{deviate}{Deviate that is compared to the upper tail of the standard Normal distribution to obtain the P-value.}
 \item{statistic}{Value of the test statistic.}
 \item{expectation}{Maximum null expectation of the test statistic for the given value of Gamma.}

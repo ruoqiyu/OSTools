@@ -17,22 +17,21 @@ match.os.full<-function(z,dist,dat,ncontrol.min=0,ncontrol.max=Inf,exact=NULL,so
   
   z<-z[o]
   p<-p[o]
-  dat<-dat[o,]
+  dat<-dat[o,,drop=FALSE]
   
   #Must have treated first
   n=length(z)
   if(!(min(z[1:(n-1)]-z[2:n])>=0)){
     o<-order(1-z)
     z<-z[o]
-    dat<-dat[o,]
+    dat<-dat[o,,drop=FALSE]
   }
   
   output=optmatch::fullmatch(dist,min.controls=ncontrol.min,max.controls=ncontrol.max,
                              data=dat,solver=solver)
-  dat1=dat[!is.na(output),]
+  dat1=dat[!is.na(output),,drop=FALSE]
   output2=output[!is.na(output)]
-  matchedset.index=substr(output2,start=3,stop=10)
-  matchedset.index.numeric=as.numeric(matchedset.index)
+  matchedset.index.numeric=as.integer(factor(output2))
   dat1$mset<-matchedset.index.numeric
   structure<-optmatch::stratumStructure(output)
   effsize<-optmatch::effectiveSampleSize(output)

@@ -1,5 +1,14 @@
 sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-sided',method='m',
                         inner=0,trim=3,lambda=1/2,weight.par=c(1,1,1)){
+  alternative <- match.arg(alternative, c('two-sided', 'greater', 'less'))
+  method <- match.arg(method, c('m', 'mcnemar', 'signedrank', 'alignedrank'))
+  if (alternative == 'two-sided' && method %in% c('m', 'alignedrank')) {
+    hi <- sens.analysis(y,D,Tobs,Gamma,tau,'greater',method,inner,trim,lambda,weight.par)
+    lo <- sens.analysis(y,D,Tobs,Gamma,tau,'less',method,inner,trim,lambda,weight.par)
+    result <- if (hi$pval <= lo$pval) hi else lo
+    result$pval <- min(1, 2*min(hi$pval,lo$pval))
+    return(result)
+  }
   stopifnot((0 <= inner) & (inner <= trim))
   stopifnot((lambda > 0) & (lambda < 1))
   stopifnot(Gamma >= 1)
@@ -12,9 +21,9 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
   if (vc) warning("y cannot include NAs.")
   stopifnot(!vc)
   
-  if (tau!=0) y[,1]<-y[,1]-tau
-  
   if (method=='mcnemar'){
+    if (tau!=0) y[,1]<-y[,1]-tau
+    
     if (is.null(D)){
       stopifnot(ncol(y)==2)
       D=sum(y[,1]!=y[,2])
@@ -27,11 +36,21 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
     p.negative=1/(1+Gamma);
     lowerbound=1-pbinom(Tobs-1,D,p.negative);
     upperbound=1-pbinom(Tobs-1,D,p.positive);
+    if (alternative == 'less') {
+      lowerbound <- pbinom(Tobs,D,p.positive)
+      upperbound <- pbinom(Tobs,D,p.negative)
+    } else if (alternative == 'two-sided') {
+      # Bonferroni combination of the two directional tail bounds.
+      lowerbound <- min(1,2*min(lowerbound,pbinom(Tobs,D,p.positive)))
+      upperbound <- min(1,2*min(upperbound,pbinom(Tobs,D,p.negative)))
+    }
     res=list(lowerbound=lowerbound,upperbound=upperbound);
     return(list(pval=res,statistic=Tobs))
   }
   
   if (method=='signedrank'){
+    if (tau!=0) y[,1]<-y[,1]-tau
+    
     stopifnot(ncol(y)==2)
     dif=y[,1]-y[,2]
     rk=rank(abs(dif));
@@ -41,15 +60,24 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
     Eplus=sum((s1+s2)*rk*Gamma)/(1+Gamma);
     Eminus=sum((s1+s2)*rk)/(1+Gamma);
     V=sum((s1+s2)*rk*rk*Gamma)/((1+Gamma)^2);
-    Dplus=(W-Eplus)/sqrt(V);
-    Dminus=(W-Eminus)/sqrt(V);
+    if (V == 0) return(list(pval=list(lowerbound=1,upperbound=1),statistic=W,
+                           deviate=list(Dminus=0,Dplus=0)))
+    Dplus=if (V == 0) 0 else (W-Eplus)/sqrt(V);
+    Dminus=if (V == 0) 0 else (W-Eminus)/sqrt(V);
     if (alternative=='greater') res=list(lowerbound=1-pnorm(Dminus),upperbound=1-pnorm(Dplus))
-    else if (alternative=='less') res=list(lowerbound=pnorm(Dminus),upperbound=pnorm(Dplus))
-    else if (alternative=='two-sided') res=list(lowerbound=2*pnorm(abs(Dminus)),upperbound=2*pnorm(abs(Dplus)))
+    else if (alternative=='less') res=list(lowerbound=pnorm(Dplus),upperbound=pnorm(Dminus))
+    else if (alternative=='two-sided') {
+      # The normal mean can range between Eminus and Eplus.
+      lower <- 2*pnorm(-max(abs(Dminus),abs(Dplus)))
+      upper <- if (Dplus <= 0 && Dminus >= 0) 1 else 2*pnorm(-min(abs(Dminus),abs(Dplus)))
+      res <- list(lowerbound=lower, upperbound=upper)
+    }
     return(list(pval=res,statistic=W,deviate=list(Dminus=Dminus,Dplus=Dplus)))
   }
   
   if (method=='alignedrank'){
+    if (tau!=0) y[,1]<-y[,1]-tau
+    
     outcome=as.vector(t(y))
     matchedset=rep(1:nrow(y),each=ncol(y))
     treated=rep(c(1,rep(0,ncol(y)-1)),nrow(y))
@@ -143,6 +171,12 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
   }
   
   if (method=='m'){
+    if (alternative=="less"){
+      y<-(-y)
+      tau<-(-tau)
+    }
+    if (!(tau == 0)) y[, 1] <- y[, 1] - tau
+    
     mscorev<-function(ymat,inner=0,trim=2.5,qu=0.5){
       ymat<-as.matrix(ymat)
       n<-dim(ymat)[1]
@@ -176,14 +210,12 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
       colnames(ms)<-colnames(ymat)
       ni<-apply(!is.na(ymat),1,sum)
       use<-(ni>=2)&(!is.na(ms[, 1]))
-      ms<-ms[use,]
+      ms<-ms[use,,drop=FALSE]
       ni<-ni[use]
       
       ms<-ms/outer(ni,rep(1,m),"*")
       ms
     }
-    
-    ms<-mscorev(y,inner=inner,trim=trim,qu=lambda)
     
     newurks<-function(smat,m=1,m1=1,m2=1){
       rg<-apply(smat,1,max)-apply(smat,1,min)
@@ -200,7 +232,7 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
       smat
     }
     
-    separable1k<-function(ymat,Gamma=1,alternative='two-sided'){
+    separable1k<-function(ymat,Gamma=1){
       stopifnot(0 == sum(is.na(as.vector(ymat))))
       n<-dim(ymat)[1]
       m<-dim(ymat)[2]
@@ -227,22 +259,19 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
       expect<-sum(maxmu)
       vartotal<-sum(maxsig2)
       dev<-(tstat-expect)/sqrt(vartotal)
-      if (alternative=='greater') pval<-1-stats::pnorm(dev)
-      else if (alternative=='less') pval<-stats::pnorm(dev)
-      else if (alternative=='two-sided') pval<-2*stats::pnorm(-abs(dev))
-      else {
-        pval=NULL
-        warning ('alternative needs to be \'greater\', \'less\', or \'two-sided\'.')
-      }
+      pval<-1-stats::pnorm(dev)
       list(pval=pval,deviate=dev,statistic=tstat, 
            expectation=expect,variance=vartotal)
     }
     
-    if (m>1) 
-      separable1k(newurks(ms,m=m,m1=m1,m2=m2),Gamma=Gamma,alternative=alternative)
-    else if (m==1) 
-      separable1k(ms,Gamma=Gamma,alternative=alternative)
+    
+    ms<-mscorev(y,inner=inner,trim=trim,qu=lambda)
+    if (m>1) result<-separable1k(newurks(ms,m=m,m1=m1,m2=m2),Gamma=Gamma)
+    else if (m==1) result<-separable1k(ms,Gamma=Gamma)
     else warning('Consider choosing a diferent weight.par.')
+    
+    if (alternative=='two-sided') result$pval<-2*stats::pnorm(-abs(result$dev))
+    result
   }
   
 }

@@ -17,7 +17,7 @@ exact=FALSE,n.mc=1000)
 If exact=TRUE, the output is a list of p-value, all possible test statistic values under the randomization distribution, and the observed test statistic value. If exact=FALSE, the output is a list of p-value, its confidence interval, all test statistic values under the monte-carlo simulations, and the observed test statistic value. 
 }
 \description{
-Randomization test for no treatment effect using the difference in sample means between the treated and control subjects or the two-sample t test as the test statistic.
+Randomization test for no treatment effect using the difference in sample means between the treated and control subjects or the pooled-variance two-sample t statistic. Two-sided tests count assignments whose absolute statistic is at least as large as the observed absolute statistic.
 }
 \examples{
 treated.r.fishoil=c(8,12,10,14,2,0,0);

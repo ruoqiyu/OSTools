@@ -1,6 +1,6 @@
 match.os<-function(z,dist,dat,p=rep(1,length(z)),exact=NULL,fine=rep(1,length(z)),ncontrol=1,
                    penalty=ifelse(is.matrix(dist),round(max(dist)*1000),round(max(dist$d)*1000)),
-                   s.cost=100,subX=NULL,solver='rlemon'){
+                   s.cost=1000,subX=NULL,solver='rlemon'){
   #Check input
   stopifnot(is.data.frame(dat))
   stopifnot(is.vector(z))
@@ -34,7 +34,8 @@ match.os<-function(z,dist,dat,p=rep(1,length(z)),exact=NULL,fine=rep(1,length(z)
   }
 
   if (!is.null(subX)){
-    if (is.factor(subX)){
+    if (!is.numeric(subX)){
+      if (!is.factor(subX)) subX <- as.factor(subX)
       levels(subX)<-1:nlevels(subX)
       subX<-as.integer(subX)
     }
@@ -52,13 +53,14 @@ match.os<-function(z,dist,dat,p=rep(1,length(z)),exact=NULL,fine=rep(1,length(z)
   z<-z[o]
   p<-p[o]
   fine<-fine[o]
-  dat<-dat[o,]
+  if (!is.null(subX)) subX<-subX[o]
+  dat<-dat[o,,drop=FALSE]
 
   #Must have treated first
   if(!(min(z[1:(n-1)]-z[2:n])>=0)){
     o<-order(1-z)
     z<-z[o]
-    dat<-dat[o,]
+    dat<-dat[o,,drop=FALSE]
     fine<-fine[o]
     if (!is.null(subX)) subX<-subX[o]
   }
@@ -81,7 +83,8 @@ match.os<-function(z,dist,dat,p=rep(1,length(z)),exact=NULL,fine=rep(1,length(z)
     stopifnot(nobs==length(fine))
 
     if (!is.null(subX)){
-      if (is.factor(subX)){
+      if (!is.numeric(subX)){
+      if (!is.factor(subX)) subX <- as.factor(subX)
         levels(subX)<-1:nlevels(subX)
         subX<-as.integer(subX)
       }
@@ -275,7 +278,7 @@ match.os<-function(z,dist,dat,p=rep(1,length(z)),exact=NULL,fine=rep(1,length(z)
     matchid<-matrix(c(id1[as.numeric(row.names(matches))],id0[as.vector((matches-sum(z)))]),
                     ncol=ncontrol+1)
     matchid<-as.vector(t(matchid))
-    dat1<-dat[matchid,]
+    dat1<-dat[matchid,,drop=FALSE]
     zm<-z[matchid]
     mset<-rep(1:nrow(matches),each=ncontrol+1)
     dat1$mset<-mset

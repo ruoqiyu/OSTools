@@ -33,7 +33,7 @@ If alternative='greater', the one-sided alternative hypothesis is that treatment
 
 \value{
 \item{PointEstimate}{An interval of point estimates allowing for a bias of gamma in treatment assignment.}
-\item{CI}{An confidence interval allowing for a bias of gamma in treatment assignment.}
+\item{Confidence.Interval}{An confidence interval allowing for a bias of gamma in treatment assignment.}
 }
 
 \description{

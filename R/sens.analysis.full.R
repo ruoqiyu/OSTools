@@ -1,12 +1,27 @@
 sens.analysis.full<-function(y,z,mset,Gamma=1,method='m',alternative='two-sided',
                              tau=0,inner=0,trim=3,lambda=1/2){
+  alternative <- match.arg(alternative, c('two-sided','greater','less'))
+  method <- match.arg(method, c('m','mh'))
+  if (alternative == 'two-sided') {
+    hi <- sens.analysis.full(y,z,mset,Gamma,method,'greater',tau,inner,trim,lambda)
+    lo <- sens.analysis.full(y,z,mset,Gamma,method,'less',tau,inner,trim,lambda)
+    result <- if (hi$pval <= lo$pval) hi else lo
+    result$pval <- min(1,2*min(hi$pval,lo$pval))
+    return(result)
+  }
+  stopifnot(length(y)==length(z), length(y)==length(mset),
+            all(is.finite(y)), all(z %in% c(0,1)), !anyNA(mset))
   stratumsize=table(mset)
   mset01=table(z,mset)
+  stopifnot(nrow(mset01)==2, all(mset01>0))
+  if (method == 'm') stopifnot(all(apply(mset01,2,min)==1))
   nostratum=length(stratumsize)
   stratumlist=names(stratumsize)
   if (method=='mh'){
+    stopifnot(all(y %in% c(0,1)), tau == 0)
+    if (alternative == 'less') y <- 1-y
     # Data for Mantel-Haenszel test
-    data2x2vec=rep(0,nostratum)
+    data2x2vec=rep(0,4*nostratum)
     index=0
     for(i in 1:nostratum){
       which.in.matched.set=which(mset==stratumlist[i])

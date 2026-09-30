@@ -19,6 +19,7 @@ statistic='mean.diff',exact=FALSE,n.mc=1000,range=c(-100,100))
 \item{lb}{Lower bound of the (1-alpha) confidence interval.}
 \item{ub}{Upper bound of the (1-alpha) confidence interval.}
 }
+\details{Monte Carlo assignments are generated once and reused throughout interval inversion. Only the finite endpoint requested by a one-sided alternative is searched.}
 \description{
 Confidence interval for the treatment effect, which is constructed by inverting  the randomization tests.
 }

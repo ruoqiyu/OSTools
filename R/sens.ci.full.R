@@ -1,7 +1,11 @@
 sens.ci.full<-function(y,z,mset,Gamma=1,inner=0,trim=3,lambda=1/2,
                   alpha=0.05,alternative='two-sided'){
+  stopifnot(length(y)==length(z), length(y)==length(mset),
+            all(is.finite(y)), all(z %in% c(0,1)), !anyNA(mset))
   stratumsize=table(mset)
   mset01=table(z,mset)
+  stopifnot(nrow(mset01)==2, all(mset01>0))
+  stopifnot(all(apply(mset01,2,min)==1))
   nostratum=length(stratumsize)
   stratumlist=names(stratumsize)
   treated1=rep(0,nostratum)

@@ -10,12 +10,12 @@ add.caliper<-function(dist,z,dx,rg, stdev = FALSE, penalty = 1000, constant = TR
   dx1=dx[z==1]
   dx0=dx[z==0]
   # Standardize p using an equally weighted pooled variance
-  v1=stats::var(dx1)
-  v2=stats::var(dx0)
-  sp=sqrt((v1+v2)/2)
-  stopifnot(sp>0)
-
-  if (stdev) rg=rg *sp
+  stopifnot(length(dx) == length(z), all(is.finite(dx)))
+  if (stdev) {
+    sp=sqrt((stats::var(dx1)+stats::var(dx0))/2)
+    stopifnot(is.finite(sp), sp>0)
+    rg=rg*sp
+  }
 
   m=sum(z)
 
@@ -27,7 +27,7 @@ add.caliper<-function(dist,z,dx,rg, stdev = FALSE, penalty = 1000, constant = TR
     return (dist)
   }else if (is.list(dist)){
     dif=dx1[dist$start]-dx0[dist$end-m]
-    if (constant) dif=(dif>rg[2])+(dif>rg[2])
+    if (constant) dif=(dif>rg[2])+(dif<rg[1])
     else dif=(dif-rg[2])*(dif>rg[2])+(rg[1]-dif)*(dif<rg[1])
     d=dist$d+dif*penalty
     return (list(d=d,start=dist$start,end=dist$end))

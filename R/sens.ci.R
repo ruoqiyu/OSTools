@@ -1,6 +1,8 @@
 sens.ci<-function(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
                   weight.par=c(1,1,1),alpha=0.05,alternative='two-sided',
                   tol=NULL,interval=NULL){
+  alternative <- match.arg(alternative, c('two-sided','greater','less'))
+  method <- match.arg(method, c('m','signedrank','alignedrank'))
   m=weight.par[1]
   m1=weight.par[2]
   m2=weight.par[3]
@@ -33,8 +35,9 @@ sens.ci<-function(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
       Dminus.taugrid[i]=deviates$Dminus;
     }
     
-    lower.si=min(taugrid[Dplus.taugrid<=1.96]);
-    upper.si=max(taugrid[Dminus.taugrid>=-1.96]);
+    critical <- stats::qnorm(1-alpha)
+    lower.si <- if (alternative == 'less') -Inf else min(taugrid[Dplus.taugrid<=critical])
+    upper.si <- if (alternative == 'greater') Inf else max(taugrid[Dminus.taugrid>=-critical])
     return(list(Confidence.Interval=c(lower.si,upper.si)))
   }
   
@@ -44,9 +47,11 @@ sens.ci<-function(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
     }
     
     # Confidence bounds
-    lci.bound=uniroot(cibound.func,c(-10,30),Gamma=Gamma,alternative="greater")
-    uci.bound=uniroot(cibound.func,c(-10,30),Gamma=Gamma,alternative="less")
-    return(list(Confidence.Interval=c(lci.bound$root,uci.bound$root)))
+    if (is.null(interval)) interval <- c(min(y[,1])-max(y[,-1]), max(y[,1])-min(y[,-1]))
+    if (is.null(tol)) tol <- diff(interval)/500000
+    lower <- if (alternative == 'less') -Inf else uniroot(cibound.func,interval,Gamma=Gamma,alternative='greater',tol=tol)$root
+    upper <- if (alternative == 'greater') Inf else uniroot(cibound.func,interval,Gamma=Gamma,alternative='less',tol=tol)$root
+    return(list(Confidence.Interval=c(lower,upper)))
   }
   
   if (method=='m'){
@@ -85,9 +90,9 @@ sens.ci<-function(y,Gamma=1,method='m',inner=0,trim=3,lambda=1/2,
     interval2<-c(-interval[2],-interval[1])
     if (is.null(tol)) tol<-((max(interval)-min(interval)))/500000
     else stopifnot(tol>0)
-    vCI<-stats::uniroot(funcCI,interval=interval,ymat=y,tol=tol)
+    vCI<-if (alternative == 'less') list(root=-Inf) else stats::uniroot(funcCI,interval=interval,ymat=y,tol=tol)
     vEST<-stats::uniroot(funcEST,interval=interval,ymat=y,tol=tol)
-    vCI2<-stats::uniroot(funcCI,interval=interval2,ymat=-y,tol=tol)
+    vCI2<-if (alternative == 'greater') list(root=-Inf) else stats::uniroot(funcCI,interval=interval2,ymat=-y,tol=tol)
     vEST2<-stats::uniroot(funcEST,interval=interval2,ymat=-y,tol=tol)
     min.estimate<-vEST$root
     max.estimate<-(-vEST2$root)

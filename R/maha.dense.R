@@ -1,56 +1,9 @@
 maha.dense<-function (z, X, exact=NULL, nearexact=NULL, penalty=100, matrix=FALSE){
-  Xmatrix<-function(x){
-    if (is.vector(x) || is.factor(x)) x<-matrix(x,nrow=length(z))
 
-    if(is.data.frame(x) || is.character(x)){
-      if(!is.data.frame(x)) x <- as.data.frame(x)
-      X.chars <- which(plyr::laply(x, function(y) 'character' %in% class(y)))
-      if(length(X.chars) > 0){
-        for(i in X.chars){
-          x[,i] <- factor(x[,i])
 
-        }
-      }
-      #if some variables are factors convert to dummies
-      X.factors <-  which(plyr::laply(x, function(y) 'factor' %in% class(y)))
-
-      #handle missing data
-      for(i in which(plyr::laply(x, function(y) any(is.na(y))))){
-        if(i %in% X.factors){
-          #for factors, make NA a new factor level
-          x[,i] <- addNA(x[,i])
-        }else{
-          #for numeric/logical, impute means and add a new indicator for missingness
-          x[[paste(colnames(x)[i],'NA', sep = '')]] <- is.na(x[,i])
-          x[which(is.na(x[,i])),i] <- mean(x[,i], na.rm = TRUE)
-        }
-      }
-      for(i in rev(X.factors)){
-        dummyXi <- model.matrix(as.formula(
-          paste('~',colnames(x)[i], '-1')),data=x)
-        x <- cbind(x[,-i], dummyXi)
-      }
-
-    }else{
-      #handle missing data
-      for(i in c(1:ncol(x))){
-        if(any(is.na(x[,i]))){
-          x <- cbind(x,is.na(X[,i]))
-          colnames(x)[ncol(x)] <- paste(colnames(X)[i],'NA', sep = '')
-          x[which(is.na(x[,i])),i] <- mean(x[,i], na.rm = TRUE)
-        }
-      }
-
-    }
-
-    #get rid of columns that do not vary
-    varying <- apply(x,2, function(y) length(unique(y)) > 1)
-    x <- x[,which(varying),drop = FALSE]
-
-    as.matrix(x)
-  }
-
-  X<-Xmatrix(X)
+  stopifnot(is.vector(z), all(z %in% c(0,1)), all(c(0,1) %in% z))
+  X<-.os_covariates(X)
+  stopifnot(nrow(X) == length(z))
   n <- dim(X)[1]
   rownames(X) <- 1:n
   k <- dim(X)[2]
@@ -81,20 +34,20 @@ maha.dense<-function (z, X, exact=NULL, nearexact=NULL, penalty=100, matrix=FALS
   }
 
 
-  for (j in 1:k) X[,j] <- rank(X[,j])
-  cv <- cov(X)
+  for (j in seq_len(k)) X[,j] <- rank(X[,j])
+  cv <- if (k == 0L) matrix(0,0,0) else cov(X)
   vuntied <- var(1:n)
   rat <- sqrt(vuntied/diag(cv))
-  cv <- diag(rat) %*% cv %*% diag(rat)
+  cv <- diag(rat,nrow=length(rat)) %*% cv %*% diag(rat,nrow=length(rat))
 #  LL<-chol(cv)
-  icov <- MASS::ginv(cv)
+  icov <- if (k == 0L) cv else MASS::ginv(cv)
   out <- matrix(NA, m, n-m)
   Xc <- X[z == 0,,drop=FALSE]
   Xt <- X[z == 1,,drop=FALSE]
   rownames(out) <- rownames(X)[z == 1]
   colnames(out) <- rownames(X)[z == 0]
 #  for (i in 1:m) out[i, ] <- mvnfast::maha(Xc,t(as.matrix(Xt[i,])),LL,isChol=TRUE)
-  for (i in 1:m) out[i, ] <- stats::mahalanobis(Xc,t(as.matrix(Xt[i,])),icov,inverted = T)
+  for (i in seq_len(m)) out[i, ] <- if (k == 0L) 0 else stats::mahalanobis(Xc,t(as.matrix(Xt[i,])),icov,inverted = TRUE)
   if (!is.null(exact)){
     dif <- outer(exact[z == 1], exact[z == 0], "!=")
     out[dif] <- Inf
