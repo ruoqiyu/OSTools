@@ -34,8 +34,8 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
     }
     p.positive=Gamma/(1+Gamma);
     p.negative=1/(1+Gamma);
-    lowerbound=1-pbinom(Tobs-1,D,p.negative);
-    upperbound=1-pbinom(Tobs-1,D,p.positive);
+    lowerbound=stats::pbinom(Tobs-1,D,p.negative,lower.tail=FALSE);
+    upperbound=stats::pbinom(Tobs-1,D,p.positive,lower.tail=FALSE);
     if (alternative == 'less') {
       lowerbound <- pbinom(Tobs,D,p.positive)
       upperbound <- pbinom(Tobs,D,p.negative)
@@ -64,7 +64,7 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
                            deviate=list(Dminus=0,Dplus=0)))
     Dplus=if (V == 0) 0 else (W-Eplus)/sqrt(V);
     Dminus=if (V == 0) 0 else (W-Eminus)/sqrt(V);
-    if (alternative=='greater') res=list(lowerbound=1-pnorm(Dminus),upperbound=1-pnorm(Dplus))
+    if (alternative=='greater') res=list(lowerbound=stats::pnorm(Dminus,lower.tail=FALSE),upperbound=stats::pnorm(Dplus,lower.tail=FALSE))
     else if (alternative=='less') res=list(lowerbound=pnorm(Dplus),upperbound=pnorm(Dminus))
     else if (alternative=='two-sided') {
       # The normal mean can range between Eminus and Eplus.
@@ -125,7 +125,7 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
         visq[i]=max(viasq[which(muia==max(muia))]);
       }
     }
-    pval.u=1-pnorm((teststat-sum(mu.i.max))/sqrt(sum(visq)));
+    pval.u=stats::pnorm((teststat-sum(mu.i.max))/sqrt(sum(visq)),lower.tail=FALSE);
     
     # Compute mu.i.min and sigma.i.max.sq in each matched set i
     # Assumes matched sets are labeled 1,...,I
@@ -259,7 +259,7 @@ sens.analysis<-function(y=NULL,D=NULL,Tobs=NULL,Gamma=1,tau=0,alternative='two-s
       expect<-sum(maxmu)
       vartotal<-sum(maxsig2)
       dev<-(tstat-expect)/sqrt(vartotal)
-      pval<-1-stats::pnorm(dev)
+      pval<-stats::pnorm(dev,lower.tail=FALSE)
       list(pval=pval,deviate=dev,statistic=tstat, 
            expectation=expect,variance=vartotal)
     }

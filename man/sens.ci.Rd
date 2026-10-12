@@ -27,13 +27,13 @@ The sensitivity parameter: Gamma=1 for a randomization test, Gamma>1 for sensiti
 \item{alternative}{
 If alternative='greater', the one-sided alternative hypothesis is that treatment increases the level of response by at least tau. If alternative='less', the one-sided alternative that the treatment decreases the level of response by at least tau. If alternative='two-sided', the alternative hypothesis is two-sided.
 }
-\item{tol}{The sens.ci function calls the R function uniroot, and tol is the tol (or tolerance) parameter in that call. If tol=NULL, sens.ci picks a reasonable tolerance.}
-\item{interval}{The sens.ci function calls the R function uniroot, and interval is the interval parameter in that call. If interval=NULL, sens.ci picks a reasonable interval.}
+\item{tol}{For M-statistics and aligned ranks, the positive finite root-finding tolerance. For signed ranks, the positive finite grid spacing, which must not exceed the search width. If NULL, the interval width divided by 500000 is used.}
+\item{interval}{Two finite, increasing search endpoints. If NULL, use the range from the smallest treated minus largest control response to the largest treated minus smallest control response. The required finite confidence bounds must lie within this range; widen it if a bound is not bracketed.}
 }
 
 \value{
 \item{PointEstimate}{An interval of point estimates allowing for a bias of gamma in treatment assignment.}
-\item{Confidence.Interval}{An confidence interval allowing for a bias of gamma in treatment assignment.}
+\item{Confidence.Interval}{A confidence interval allowing for a bias of Gamma in treatment assignment. Signed-rank endpoints approximate the retained set on the supplied grid. One-sided intervals have an infinite endpoint on the untested side.}
 }
 
 \description{
@@ -71,8 +71,7 @@ Rosenbaum, P. R. (2015). Two R packages for sensitivity analysis in observationa
 }
 
 \note{
-sens.ci inverts a test to obtain confidence intervals and point estimats; so, it calls senmw many times, solving several equations, and sens.ci is much slower than a single call to senmw. sens.ci finds point estimates and confidence intervals by searching for a value of the parameter tau in "interval" determining the solution tau.hat to an estimating equation with an error of "tol" in solving the equation.  If interval=NULL and tol=NULL, sens.ci tries to pick a reasonable finite interval and tol>0.  If concerned about these "reasonable values", set detail=TRUE, make the interval longer, the tol smaller, and wait longer for program to run.
+Signed-rank calculations stop with an explanatory error if a required finite bound is truncated by the search interval, or if no effects are retained on the grid. Widen the interval or reduce the grid spacing as indicated. A finite bound may not be estimable for some sample sizes, significance levels or sensitivity parameters; increasing the range does not guarantee success. One-sided calculations check only their finite endpoint. Critical values use a direct upper-tail quantile to avoid subtracting tiny probabilities from one.
 
-Unlike sens.analysis, senms.ci does not permit redescending rank scores.
+For M-statistics and aligned ranks, required roots must be bracketed by the finite search endpoints; otherwise a descriptive error identifies the missing bound. Nonfinite inputs, invalid significance levels and tuning arguments are rejected before searching. Redescending weights are not supported for confidence intervals. Existing test approximations remain unchanged.
 }
-

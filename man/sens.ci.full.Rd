@@ -21,13 +21,13 @@ The sensitivity parameter: Gamma=1 for a randomization test, Gamma>1 for sensiti
 
 \item{alpha}{1-alpha is the coverage of the confidence interval.}
 \item{alternative}{
-If alternative='greater', the one-sided alternative hypothesis is that treatment increases the level of response by at least tau. If alternative='less', the one-sided alternative that the treatment decreases the level of response by at least tau. If alternative='two-sided', the alternative hypothesis is two-sided.
+If alternative='greater', the one-sided alternative hypothesis is that treatment increases the level of response by at least tau. If alternative='less', the one-sided alternative that the treatment decreases the level of response by at least tau. If alternative='two-sided', the alternative hypothesis is two-sided. Unique abbreviations are accepted; invalid choices raise an error.
 }
 }
 
 \value{
-\item{PointEstimate}{An interval of point estimates allowing for a bias of Gamma in treatment assignment.}
-\item{CI}{An confidence interval allowing for a bias of Gamma in treatment assignment.}
+\item{PointEstimates}{An interval of point estimates allowing for a bias of Gamma in treatment assignment.}
+\item{ConfidenceInterval}{A confidence interval allowing for a bias of Gamma in treatment assignment.}
 }
 
 \description{
@@ -63,3 +63,5 @@ Rosenbaum, P. R. (2014) Weighted M-statistics with superior design sensitivity i
 }
 
 
+
+\note{The function validates finite response and sensitivity inputs, significance level, score tuning, treatment indicators and matched-set composition before calling sensitivityfull. Returned confidence endpoints must be ordered and nonmissing. No NULL result is returned for an invalid alternative. Existing backend interval calculations are unchanged.}

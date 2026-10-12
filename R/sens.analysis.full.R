@@ -2,6 +2,8 @@ sens.analysis.full<-function(y,z,mset,Gamma=1,method='m',alternative='two-sided'
                              tau=0,inner=0,trim=3,lambda=1/2){
   alternative <- match.arg(alternative, c('two-sided','greater','less'))
   method <- match.arg(method, c('m','mh'))
+  if (!is.numeric(Gamma) || length(Gamma)!=1L || !is.finite(Gamma) || Gamma<1)
+    stop("Gamma must be a finite scalar at least 1.")
   if (alternative == 'two-sided') {
     hi <- sens.analysis.full(y,z,mset,Gamma,method,'greater',tau,inner,trim,lambda)
     lo <- sens.analysis.full(y,z,mset,Gamma,method,'less',tau,inner,trim,lambda)
@@ -33,7 +35,31 @@ sens.analysis.full<-function(y,z,mset,Gamma=1,method='m',alternative='two-sided'
     }
     data.array=array(data2x2vec,c(2,2,nostratum))
     # Sensitivity analysis 
-    pval=sensitivity2x2xk::mh(data.array,Gamma=Gamma)$pval
+    # Sum the upper tail as a lower tail of failures, using positive-only
+    # truncated convolution. FFT convolution can swamp very small tails.
+    m1 <- data.array[1,1,]+data.array[1,2,]
+    m2 <- data.array[2,1,]+data.array[2,2,]
+    n <- data.array[1,1,]+data.array[2,1,]
+    minimum <- pmax(0,n-m2)
+    maximum <- pmin(n,m1)
+    observed <- sum(data.array[1,1,])
+    target <- sum(maximum)-observed
+    probabilities <- 1
+    for (i in seq_len(nostratum)) {
+      x <- seq.int(minimum[i],maximum[i])
+      logweights <- lchoose(m1[i],x)+lchoose(m2[i],n[i]-x)+
+        (x-maximum[i])*log(Gamma)
+      weights <- exp(logweights-max(logweights))
+      failures <- rev(weights/sum(weights))
+      size <- min(target+1,length(probabilities)+length(failures)-1)
+      updated <- numeric(size)
+      for (j in seq_len(min(length(failures),size))) {
+        use <- seq_len(min(length(probabilities),size-j+1))
+        updated[use+j-1] <- updated[use+j-1]+failures[j]*probabilities[use]
+      }
+      probabilities <- updated
+    }
+    pval <- min(1,sum(probabilities))
     list(pval=pval,data.array=data.array)
   }else if (method=='m'){
     treated1=rep(0,nostratum)
@@ -56,6 +82,9 @@ sens.analysis.full<-function(y,z,mset,Gamma=1,method='m',alternative='two-sided'
     }
   
     treated1=as.logical(treated1)
-    sensitivityfull::senfm(ymat,treated1,Gamma,inner,trim,lambda,tau,alternative)   
+    result <- sensitivityfull::senfm(ymat,treated1,Gamma,inner,trim,lambda,tau,alternative)
+    # The backend deviate already represents the requested direction.
+    result$pval <- stats::pnorm(result$deviate,lower.tail=FALSE)
+    result   
   }
 }

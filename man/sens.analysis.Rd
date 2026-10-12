@@ -117,3 +117,5 @@ Tardif, S. (1987). Efficiency and optimality results for tests based on weighted
 
 
 
+
+\note{Upper-tail binomial and Normal probabilities are evaluated directly using lower.tail = FALSE, preserving representable small p-values that could be lost by subtracting a cumulative probability from one. Probabilities below floating-point range can still underflow. Statistical approximations and sidedness conventions are unchanged.}

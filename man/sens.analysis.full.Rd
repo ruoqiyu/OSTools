@@ -70,3 +70,5 @@ Rosenbaum, P. R. (2014) Weighted M-statistics with superior design sensitivity i
 }
 
 
+
+\note{For M-statistics, the Normal upper-tail p-value is recomputed directly from the backend's direction-specific deviate. This avoids cancellation for very small, representable p-values. Binary upper tails are summed by positive-only truncated convolution of the conditional noncentral hypergeometric probabilities. This replaces FFT convolution, which can introduce a rounding artifact larger than a tiny tail. The conditional test and Normal approximation are unchanged.}
