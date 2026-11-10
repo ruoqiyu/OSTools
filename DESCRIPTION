@@ -1,17 +1,19 @@
 Package: OSTools
 Type: Package
 Title: Causal Inference Tools for Observational Studies
-Version: 0.1.11
+Version: 0.1.14
 Author: Ruoqi Yu, Dylan Small
 Maintainer: Ruoqi Yu <ruoqi.yu.ry@gmail.com>
 Description: This package provides practical causal inference tools for observational studies, including building matched samples for binary treatments and treatment doses with similar distributions for observed covariates, evaluating covariate balance, and conducting randomization inference and sensitivity analysis for the outcome analysis to assess the conclusion's sensitivity to unobserved covariates, natural-strata construction and balance diagnostics, independent-group Welch contrasts and ordered comparisons with two control groups, as well as p-value combinations and partial conjunction tests for evidence factors, closed testing, and sensitivity analysis in disjoint groups of matched pairs, and rank-based instrumental-variable tests and confidence sets for independent encouragement groups and matched pairs.
+    Adds chronological optimal nonoverlapping risk-set matching and mean/M-score sensitivity tests and numerical confidence sets for censored Tobit reduction effects.
+    Also provides outcome-only synthetic-control fitting and descriptive in-space placebo comparisons.
     Hansen (2011) <doi:10.1007/978-1-4419-9389-2_9>.
     Rosenbaum (1989) <doi: 10.1080/01621459.1989.10478868>  
     Yu and Rosenbaum (2019) <doi:10.1111/biom.13098>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: stats, utils, plyr, mvnfast, methods, MASS, rlemon, ggplot2, rlang, nbpMatching, sensitivityfull, optmatch, sensitivity2x2xk, senstrat
+Imports: stats, utils, plyr, mvnfast, methods, MASS, rlemon, ggplot2, rlang, nbpMatching, sensitivityfull, optmatch, sensitivity2x2xk, senstrat, quadprog, Rglpk, slam
 Suggests: rrelaxiv, sensitivitymv, natstrat (>= 2.0.1)
 Additional_repositories:	https://github.com/josherrickson/rrelaxiv
 Note: One minimum cost flow problem may have several or many solutions that are equivalent in providing the same minimum total or mean cost. Minor differences between computers or implementations may have the minor consequence of altering which equivalent solution is produced.

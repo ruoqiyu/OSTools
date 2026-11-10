@@ -15,3 +15,9 @@ S3method(print,os_sensitivity_groups)
 
 S3method(print,os_iv_test)
 S3method(print,os_iv_ci)
+S3method(print,os_sc_fit)
+S3method(print,os_sc_placebo)
+
+S3method(print,os_tobit_test)
+S3method(print,os_tobit_ci)
+S3method(print,os_risk_set_match)
